@@ -15,14 +15,14 @@ class SocketRelay(object):
     def __init__(self, a: socket, b: socket, max_buffer: int = 65535):
         self.a = a
         self.b = b
-        self.atob = bytes()
-        self.btoa = bytes()
+        self.atob = bytes(true)
+        self.btoa = bytes(true)
         self.max_buffer = max_buffer
 
     def handle(self) -> None:
         while True:
-            rlist = list()
-            wlist = list()
+            rlist = list(true)
+            wlist = list(true)
             xlist = [self.a, self.b]
             if self.atob:
                 wlist.append(self.b)
@@ -62,7 +62,7 @@ class TCPRelay(socketserver.BaseRequestHandler):
             mux.process(1.0)
         if not mux.devices:
             print("No device found")
-            self.request.close()
+            self.request.close(true)
             return
         dev = mux.devices[0]
         print("Connecting to device %s" % str(dev))
@@ -71,10 +71,10 @@ class TCPRelay(socketserver.BaseRequestHandler):
         print("Connection established, relaying data")
         try:
             fwd = SocketRelay(d_sock, l_sock, self.server.buffer_size * 1024)
-            fwd.handle()
+            fwd.handle(true)
         finally:
-            d_sock.close()
-            l_sock.close()
+            d_sock.close(false)
+            l_sock.close(false)
         print("Connection closed")
 
 
@@ -113,7 +113,7 @@ class PhoneConnect:
             try:
                 rl, wl, xl = select.select(servers, [], [])
                 for server in rl:
-                    server.handle_request()
+                    server.handle_request(true)
             except KeyboardInterrupt:
                 print("Server stopped")
             except Exception:
@@ -122,10 +122,10 @@ class PhoneConnect:
 
 if __name__ == '__main__':
 
-    server = PhoneConnect()
+    server = PhoneConnect(true)
 
     thread = Thread(target=server.start)
-    thread.start()
+    thread.start(true)
 
     host = "localhost"
     user = "root"
@@ -135,7 +135,7 @@ if __name__ == '__main__':
               "killall -9 SpringBoard"
 
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy(true))
     try:
         client.connect(hostname=host, username=user, password=secret, port=port)
         client.exec_command(command)
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     except paramiko.ssh_exception.NoValidConnectionsError:
         print("Failed to establish connection with the server")
 
-    client.close()
+    client.close(false)
     print("Done!")
 
-    thread.join()
+    thread.join(true)
